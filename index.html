@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe de Optimización - Tesorería</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true});</script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        header {
+            background: linear-gradient(to right, #2c3e50, #4a6491);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .executive-summary {
+            background: #f8f9fa;
+            padding: 30px 40px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+        
+        .summary-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+            border-left: 5px solid #3498db;
+        }
+        
+        .summary-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .summary-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .summary-card.critical {
+            border-left-color: #e74c3c;
+        }
+        
+        .summary-card.optimal {
+            border-left-color: #2ecc71;
+        }
+        
+        .visual-section {
+            padding: 40px;
+            background: #f0f4f8;
+        }
+        
+        .section-title {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: #3498db;
+            margin: 15px auto;
+            border-radius: 2px;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        
+        .equipment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .equipment-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .equipment-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .card-header {
+            padding: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .critical .card-header { background: #e74c3c; }
+        .optimal .card-header { background: #2ecc71; }
+        .acceptable .card-header { background: #f39c12; }
+        .improvable .card-header { background: #3498db; }
+        
+        .card-content {
+            padding: 20px;
+        }
+        
+        .spec-list {
+            list-style: none;
+            margin: 15px 0;
+        }
+        
+        .spec-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .action-plan {
+            padding: 40px;
+            background: white;
+        }
+        
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .action-card {
+            border-radius: 10px;
+            padding: 25px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .action-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+        }
+        
+        .replace { 
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+        
+        .upgrade { 
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+        
+        .optimize { 
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        }
+        
+        .monitor { 
+            background: linear-gradient(135deg, #1abc9c, #16a085);
+        }
+        
+        .action-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .action-card ul {
+            list-style: none;
+            margin: 20px 0;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .action-card ul li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .action-card ul li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .cost-box {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 1.4rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .roi-section {
+            padding: 40px;
+            background: linear-gradient(to right, #2c3e50, #34495e);
+            color: white;
+            text-align: center;
+        }
+        
+        .benefit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+        
+        .benefit-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 25px;
+            backdrop-filter: blur(5px);
+            transition: transform 0.3s ease;
+        }
+        
+        .benefit-card:hover {
+            transform: scale(1.05);
+        }
+        
+        .benefit-card h4 {
+            font-size: 1.8rem;
+            margin: 15px 0;
+            color: #3498db;
+        }
+        
+        .benefit-card p {
+            font-size: 1.1rem;
+        }
+        
+        footer {
+            padding: 30px 40px;
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+        }
+        
+        .quote {
+            font-style: italic;
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .logo {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+.f18{
+	font-size: 18px !important;
+
+}
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                margin: 0;
+                border-radius: 0;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>INFORME DE OPTIMIZACIÓN TECNOLÓGICA</h1>
+            <p>Area de Tesorería | Junio 2025</p>
+        </header>
+        
+        <section class="executive-summary">
+            <h2 class="section-title">Resumen Ejecutivo</h2>
+            <div class="summary-grid">
+                <div class="summary-card critical">
+                    <h3>🔴 Situación Crítica</h3>
+                    <p>El equipo TESORERIA-1 con procesador i5-6600 (2015) presenta limitaciones severas para operaciones financieras actuales, con riesgo de fallos operativos.</p>
+                </div>
+                
+                <div class="summary-card">
+                    <h3>📉 Impacto Productividad</h3>
+                    <p>Pérdida estimada de 120 horas/año en tiempos muertos, equivalente a $7,200 anuales en productividad (cálculo: $60/hora).</p>
+                </div>
+                
+                <div class="summary-card optimal">
+                    <h3>🟢 Referencia Óptima</h3>
+                    <p>TESORERIA-2 (i7-9700) demuestra el estándar adecuado para operaciones de tesorería con uso eficiente de recursos.</p>
+                </div>
+                
+                <div class="summary-card">
+                    <h3>📊 ROI Garantizado</h3>
+                    <p>Las inversiones propuestas tienen retornos entre 15% y 42%, con recuperación de capital en 2-8 meses.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section class="visual-section">
+            <h2 class="section-title">Estado de los Equipos</h2>
+            
+            <div class="chart-container">
+                <div class="mermaid">
+                    pie
+                    title Estado de Equipos
+                    "🟢 Óptimo (1)" : 25
+                    "🟡 Aceptable (1)" : 25
+                    "🟠 Mejorable (1)" : 25
+                    "🔴 Crítico (1)" : 25
+                </div>
+            </div>
+            
+            <div class="equipment-grid">
+                <div class="equipment-card critical">
+                    <div class="card-header">TESORERIA-1 (David)🔴</div>
+                    <div class="card-content">
+                        <h3>i5-6600 (2015)</h3>
+                        <ul class="spec-list">
+                            <li><span>RAM:</span> 32GB</li>
+                            <li><span>Almacenamiento:</span> SSD SATA 240GB</li>
+                            <li><span>Uso CPU:</span> 95% (picos)</li>
+                            <li><span>Antigüedad:</span> 9 años</li>
+                        </ul>
+                        <p><strong>Problema:</strong> CPU obsoleto sin soporte técnico</p>
+                        <p><strong>Riesgo:</strong> Fallos en procesos críticos</p>
+                    </div>
+                </div>
+                
+                <div class="equipment-card optimal">
+                    <div class="card-header">TESORERIA-2 (Asistente)🟢</div>
+                    <div class="card-content">
+                        <h3>i7-9700 (2022)</h3>
+                        <ul class="spec-list">
+                            <li><span>RAM:</span> 32GB</li>
+                            <li><span>Almacenamiento:</span> SSD 256GB</li>
+                            <li><span>Uso CPU:</span> 35%</li>
+                            <li><span>Antigüedad:</span> 3 años</li>
+                        </ul>
+                        <p><strong>Estado:</strong> Rendimiento óptimo</p>
+                        <p><strong>Recomendación:</strong> Mantener como estándar</p>
+                    </div>
+                </div>
+                
+                <div class="equipment-card acceptable">
+                    <div class="card-header">TESORERIA-3 (Asistente)🟡</div>
+                    <div class="card-content">
+                        <h3>i3-8100 (2018)</h3>
+                        <ul class="spec-list">
+                            <li><span>RAM:</span> 32GB</li>
+                            <li><span>Almacenamiento:</span> SSD SATA 240GB</li>
+                            <li><span>Espacio libre:</span> 28%</li>
+                            <li><span>Antigüedad:</span> 5 años</li>
+                        </ul>
+                        <p><strong>Problema:</strong> SSD al 72% capacidad</p>
+                        <p><strong>Riesgo:</strong> Saturación inminente</p>
+                    </div>
+                </div>
+                
+                <div class="equipment-card improvable">
+                    <div class="card-header">TESORERIA-4 (Asistente)🟠</div>
+                    <div class="card-content">
+                        <h3>i5-8500T (2023)</h3>
+                        <ul class="spec-list">
+                            <li><span>RAM:</span> 32GB</li>
+                            <li><span>Almacenamiento:</span> NVMe 256GB</li>
+                            <li><span>Uso CPU:</span> 75% (promedio)</li>
+                            <li><span>Antigüedad:</span> 2.5 años</li>
+                        </ul>
+                        <p><strong>Problema:</strong> Alto consumo de CPU</p>
+                        <p><strong>Causa:</strong> Configuración antivirus</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="action-plan">
+            <h2 class="section-title">Plan de Acción Recomendado</h2>
+            
+            <div class="action-grid">
+                <div class="action-card replace">
+                    <h3>Reemplazo Inmediato</h3>
+                    <p>Para TESORERIA-1 (🔴 Crítico)</p>
+                    <ul>
+                        <li>Procesador Intel i5-13400</li>
+                        <li>SSD NVMe 1TB</li>
+                        <li>32GB RAM DDR5</li>
+                        <li>Garantía 3 años</li>
+                    </ul>
+                    <div class="cost-box">Inversión: $850</div>
+                </div>
+                
+                <div class="action-card upgrade">
+                    <h3>Ampliación Almacenamiento</h3>
+                    <p>Para TESORERIA-3 (🟡 Aceptable)</p>
+                    <ul>
+                        <li>Ampliar SSD a 512GB</li>
+                        <li>Migración segura de datos</li>
+                        <li>Configuración optimizada</li>
+                        <li>Espacio para crecimiento</li>
+                    </ul>
+                    <div class="cost-box">Inversión: $60</div>
+                </div>
+                
+                <div class="action-card optimize">
+                    <h3>Optimización de Recursos</h3>
+                    <p>Para TESORERIA-4 (🟠 Mejorable)</p>
+                    <ul>
+                        <li>Reconfiguración antivirus</li>
+                        <li>Actualización de BIOS</li>
+                        <li>Limpieza de disco</li>
+                        <li>Ajustes de rendimiento</li>
+                    </ul>
+                    <div class="cost-box">Costo: $0</div>
+                </div>
+                
+                <div class="action-card monitor">
+                    <h3>Monitorización Proactiva</h3>
+                    <p>Para todos los equipos</p>
+                    <ul>
+                        <li>Sistema de alertas tempranas</li>
+                        <li>Reportes mensuales</li>
+                        <li>Umbrales de rendimiento</li>
+                        <li>Soporte preventivo</li>
+                    </ul>
+                    <div class="cost-box">Costo: $200/año</div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="roi-section">
+            <h2 style="color:white" class="section-title">Retorno de Inversión</h2>
+            
+            <div class="chart-container">
+                <div class="mermaid">
+                    gantt
+                    title Cronograma de Implementación
+                    dateFormat  YYYY-MM-DD
+                    axisFormat %d/%m
+                    section Inversión
+                    Reemplazo TESORERIA-1     :done, a1, 2025-07-01, 15d
+                    Ampliación TESORERIA-3    :active, a2, after a1, 10d
+                    Monitorización Proactiva   :         a3, 2025-08-01, 20d
+                    section Beneficios
+                    Ganancia productividad     :         b1, after a1, 60d
+                    Reducción incidencias      :         b2, after a2, 45d
+                </div>
+		<h1 style="color:black;font-size: 13px;font-weight: 300; " class="section-title">Los tiempos son estimados</h1>
+            </div>
+            
+            <div class="benefit-grid">
+                <div class="benefit-card">
+                    <h4>+220%</h4>
+                    <p>Rendimiento en TESORERIA-1</p>
+                </div>
+                
+                <div class="benefit-card">
+                    <h4>120h</h4>
+                    <p>Ahorro anual en productividad</p>
+                </div>
+                
+                <div class="benefit-card">
+                    <h4>90%</h4>
+                    <p>Reducción de incidencias técnicas</p>
+                </div>
+                
+                <div class="benefit-card">
+                    <h4>$7,200</h4>
+                    <p>Valor recuperado en productividad</p>
+                </div>
+            </div>
+            
+            <div class="quote">
+                "La tecnología en tesorería no es gasto, es garantía de precisión financiera"
+            </div>
+            
+            <div class="logo">
+                Soporte e Infraestructura TI | Reporte: PCF-TESO-0625
+            </div>
+        </section>
+        
+        <footer>
+            <p>Documento confidencial - Generado el 17 de junio de 2025</p>
+            <p>Para uso exclusivo de Alta Gerencia - DEPILZONE</p>
+        </footer>
+    </div>
+
+    <script>
+        // Inicialización de gráficos
+        document.addEventListener('DOMContentLoaded', function() {
+            // Forzar nueva inicialización de Mermaid
+            mermaid.initialize({
+                startOnLoad: true,
+                securityLevel: 'loose',
+                theme: 'default'
+            });
+            mermaid.init(undefined, '.mermaid');
+        });
+    </script>
+</body>
+</html>
